@@ -15,6 +15,13 @@ export const clusters: Readonly<ClusterWithLocal[]> = [
 export type DevCluster = 'devnet' | 'local'
 export const devClusters: Readonly<DevCluster[]> = ['devnet', 'local'] as const
 
+export function isDevCluster(value: string): value is DevCluster {
+  return devClusters.includes(value as DevCluster)
+}
+export function assertDevCluster(value: string): asserts value is DevCluster {
+  assert(isDevCluster(value), `Invalid dev cluster: ${value}`)
+}
+
 // -----------------
 // Commitments
 // -----------------
@@ -28,6 +35,7 @@ export const commitments: Readonly<Commitment[]> = [
   'root',
   'max',
 ] as const
+
 export function isCommitment(value: string): value is Commitment {
   return commitments.includes(value as Commitment)
 }

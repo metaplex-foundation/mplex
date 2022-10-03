@@ -1,6 +1,11 @@
 import yargs from 'yargs/yargs'
 import { hideBin } from 'yargs/helpers'
-import { assertCommitment, commitments, devClusters } from '../types'
+import {
+  assertCommitment,
+  assertDevCluster,
+  commitments,
+  devClusters,
+} from '../types'
 import { strict as assert } from 'assert'
 import { cmdAirdrop } from './commands/airdrop'
 import { closeConnection } from '../utils/connection'
@@ -67,9 +72,16 @@ async function main() {
 
         assert(
           typeof destination === 'string',
-          'Destination public key is required'
+          'Destination public key string is required'
+        )
+        assert(
+          typeof commitment === 'string',
+          'Commitment needs to be a string'
         )
         assertCommitment(commitment)
+
+        assert(typeof cluster === 'string', 'Cluster needs to be a string')
+        assertDevCluster(cluster)
 
         const { connection } = await cmdAirdrop(
           cluster,
