@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["src/plex.ts"],
+  "excludePrivate": true,
+  "categorizeByGroup": false,
+  "readme": "none",
+  "emit": "both"
+}
