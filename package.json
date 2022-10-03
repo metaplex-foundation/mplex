@@ -11,7 +11,7 @@
     "prepublishOnly": "yarn check:publish-ready",
     "postpublish": "git push origin && git push origin --tags",
     "build": "rimraf dist && tsc -p tsconfig.json",
-    "amman:start": "DEBUG='amman*' amman start",
+    "amman:start": "DEBUG='amman*(info|debug|error)' amman start",
     "amman:stop": "amman stop",
     "test": "tape dist/test/*.js",
     "lint": "prettier -c ./src/ && prettier -c ./test/",
@@ -41,13 +41,16 @@
   },
   "dependencies": {
     "@metaplex-foundation/js": "^0.16.1",
+    "@solana/web3.js": "^1.63.1",
     "debug": "^4.3.4",
     "yargs": "^17.6.0"
   },
   "devDependencies": {
     "@metaplex-foundation/amman": "^0.12.0",
     "@metaplex-foundation/amman-client": "^0.2.2",
+    "@types/debug": "^4.1.7",
     "@types/tape": "^4.13.2",
+    "@types/yargs": "^17.0.13",
     "esbuild": "^0.15.10",
     "esbuild-runner": "^2.2.1",
     "prettier": "^2.7.1",
