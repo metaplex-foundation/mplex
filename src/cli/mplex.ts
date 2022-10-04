@@ -10,6 +10,7 @@ import { strict as assert } from 'assert'
 import { cmdAirdrop } from './commands/airdrop'
 import { closeConnection } from '../utils/connection'
 import { logError } from '../utils/log'
+import { MplexAmman } from 'src/utils/amman'
 
 const commands = yargs(hideBin(process.argv))
   .command(
@@ -82,6 +83,8 @@ async function main() {
 
         assert(typeof cluster === 'string', 'Cluster needs to be a string')
         assertDevCluster(cluster)
+
+        MplexAmman.init(cluster)
 
         const { connection } = await cmdAirdrop(
           cluster,

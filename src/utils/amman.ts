@@ -1,5 +1,6 @@
 import { Amman } from '@metaplex-foundation/amman-client'
 import { ClusterWithLocal } from '../types'
+import { logDebug } from '../utils/log'
 
 const programIds = {
   hausS13jsjafwWwGqZTUQRmWyvyxn9EQpqMwV1PBBmk: 'auctionHouse',
@@ -17,10 +18,17 @@ export class MplexAmman {
     // also try to connect to amman relay and enable it magically.
     // Alternatively we could provide a wrapper binary which calls `mplex` with
     // that env var set.
-    if (cluster === 'local' && process.env.MPLEX_AMMAN != null) {
-      this._amman = Amman.instance({
-        knownLabels: programIds,
-      })
+    if (cluster === 'local') {
+      if (process.env.MPLEX_AMMAN != null) {
+        this._amman = Amman.instance({
+          knownLabels: programIds,
+        })
+        logDebug('Enabled amman integration')
+      } else {
+        logDebug(
+          `Set env var 'MPLEX_AMMAN=1' in order to enable amman integration when running on local cluster`
+        )
+      }
     }
   }
 
@@ -37,4 +45,4 @@ export class MplexAmman {
   }
 }
 
-export const amman = () => MplexAmman.amman
+export const tryAmman = () => MplexAmman.amman
