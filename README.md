@@ -2,6 +2,16 @@
 
 Command line interface to the Metaplex SDK.
 
+## Amman Integration
+
+When running against the `local` cluster you can enable [amman] integration in order to
+diagnose transaction in the [amman-explorer].
+
+Simply run `export MPLEX_AMMAN=1` in the same terminal from which you run the `mplex` command.
+
+TODO: we may provide an alternative command here, i.e. `mplexa` or similar which will have this
+environment variable set.
+
 ## Examples
 
 ### Preparation
@@ -47,3 +57,4 @@ $env:DEBUG = 'mplex:(info|error)'
 <!-- Links -->
 
 [amman]:https://github.com/metaplex-foundation/amman
+[amman-explorer]:https://amman-explorer.metaplex.com/
