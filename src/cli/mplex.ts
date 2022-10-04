@@ -13,6 +13,9 @@ import { logError } from '../utils/log'
 import { MplexAmman } from 'src/utils/amman'
 
 const commands = yargs(hideBin(process.argv))
+  // -----------------
+  // Airdrop
+  // -----------------
   .command(
     'airdrop',
     `Drops the amount of sols to the provided address (only works for ${devClusters} clusters)`,
@@ -45,7 +48,46 @@ const commands = yargs(hideBin(process.argv))
         })
     }
   )
-  .command('cm', 'Creates and interacts with candy machines', (_args) => {})
+  // -----------------
+  // CM (Candy Machine)
+  // -----------------
+  .command('cm', 'Creates and interacts with candy machines', (args) => {
+    args
+      .command('create', 'Create a new Candy Machine', (_args) => {})
+      .command('update', 'Update an existing Candy Machine', (_args) => {})
+      .command(
+        'insert',
+        'Insert items into an existing Candy Machine',
+        (_args) => {}
+      )
+      .command('delete', 'Delete an existing Candy Machine', (_args) => {})
+      .command('mint', 'Mint from an existing Candy Machine', (_args) => {})
+      .command(
+        'find',
+        'Finds an existing Candy Machine by its addres (includes Candy Guard if any)',
+        (_args) => {}
+      )
+      // -----------------
+      // CM Candy Guards
+      // -----------------
+      .command(
+        'cg',
+        'Creates and interacts with candy machine guards',
+        (args) => {
+          args
+            .command('create', 'Creates a new Candy Guard', (_args) => {})
+            .command('update', 'Updates an existing Candy Guard', (_args) => {})
+            .command('delete', 'Deletes an existing Candy Guard', (_args) => {})
+            .command(
+              'find',
+              'Finds an existing Candy Guard by address or authority',
+              (_args) => {}
+            )
+            .command('wrap', 'Wraps an existing Candy Guard', (_args) => {})
+            .command('unwrap', 'Unwraps an existing Candy Guard', (_args) => {})
+        }
+      )
+  })
 
 async function main() {
   const args = await commands.parse()
