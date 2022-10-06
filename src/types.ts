@@ -3,6 +3,7 @@ import { strict as assert } from 'assert'
 import {
   CreateCandyMachineInput,
   DefaultCandyGuardSettings,
+  Cluster as SdkCluster,
 } from '@metaplex-foundation/js'
 
 // -----------------
@@ -18,6 +19,13 @@ export const clusters: Readonly<ClusterWithLocal[]> = [
 
 export type DevCluster = 'devnet' | 'local'
 export const devClusters: Readonly<DevCluster[]> = ['devnet', 'local'] as const
+
+export function clusterWithLocalToSdkCluster(
+  cluster: ClusterWithLocal
+): SdkCluster {
+  if (cluster === 'local') return 'localnet'
+  return cluster
+}
 
 export function isDevCluster(value: string): value is DevCluster {
   return devClusters.includes(value as DevCluster)
