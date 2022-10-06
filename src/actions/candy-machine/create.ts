@@ -1,56 +1,67 @@
 import {
   CreateCandyMachineInput,
   Metaplex,
-  PublicKey,
-  Signer,
+  NftWithToken,
 } from '@metaplex-foundation/js'
 import { CandyMachineCreateArgs } from '@/types'
 import { strict as assert } from 'assert'
 import { tryAmman } from '@/utils/amman'
-import { logDebug } from '@/utils'
-
-type Collection = {
-  address: PublicKey
-  updateAuthority: Signer
-}
+import { ConfirmOptions } from '@solana/web3.js'
 
 export async function candyMachineCreate(
   mx: Metaplex,
   args: CandyMachineCreateArgs
 ) {
-  // TODO(thlorenz): allow user to either provide collection or the desired collection name
-  // TODO(thlorenz): how do I get a URI if I just want to create a collection
-  //                 from scratch and or why do I need a collection at all to create a candy
-  //                 machine?
-  // TODO(thlorenz): do sellerFeeBasisPoints match the setting in the candy machine itself?
-  //                 what are they based on (the example mentions 250 to denote 2.5%)
-  const collection =
+  const nft =
     args.collection ??
-    (await createCollection(mx, 'MyCollectionNft', 'http://some/uri', 100))
-  logDebug({ collection })
+    (await createCollection(
+      mx,
+      'MyCollectionNft',
+      'http://some/uri',
+      100,
+      args.confirmOptions
+    ))
+  const collection = {
+    address: nft.address,
+    updateAuthority: mx.identity(),
+  }
   const input: CreateCandyMachineInput = { ...args, collection }
-  return mx.candyMachines().create(input).run()
+  const { response, candyMachine, candyMachineSigner } = await mx
+    .candyMachines()
+    .create(input)
+    .run()
+
+  const amman = tryAmman()
+  if (amman != null) {
+    await amman.addr.addLabel('tx: create candy machine', response.signature)
+    await amman.addr.addLabels(candyMachine)
+    await amman.addr.addLabels(candyMachine.candyGuard)
+    await amman.addr.addLabels(candyMachine.creators)
+    await amman.addr.addLabel(
+      'candyMachineSigner',
+      candyMachineSigner.publicKey
+    )
+  }
+  return candyMachine
 }
 
+// TODO(thlorenz): This is a stop gap ... we need to have the user create a collection first via
+// mplex nft create ... and then provide us the address
 async function createCollection(
   mx: Metaplex,
   collectionName: string,
   uri: string,
-  sellerFeeBasisPoints: number
-): Promise<Collection> {
+  sellerFeeBasisPoints: number,
+  confirmOptions?: ConfirmOptions
+): Promise<NftWithToken> {
   const { nft, response, ...rest } = await mx
     .nfts()
     .create({
-      // TODO(thlorenz): Need more clarification here around creating a
-      // collection, i.e. what should be the authority if we create it for the
-      // user?
       isCollection: true,
-      collectionIsSized: true,
-      collection: mx.identity().publicKey,
-      collectionAuthority: mx.identity(),
       name: collectionName,
       uri,
       sellerFeeBasisPoints,
+      confirmOptions,
     })
     .run()
 
@@ -62,6 +73,9 @@ async function createCollection(
     await amman.addr.addLabels(rest)
   }
 
-  assert(nft.collection != null, 'Should have created a collection')
-  return { ...nft.collection, updateAuthority: mx.identity() }
+  assert(
+    nft.address != null,
+    'Should have created an NFT with collection address'
+  )
+  return nft
 }
