@@ -1,6 +1,7 @@
 import { Amman } from '@metaplex-foundation/amman-client'
 import { ClusterWithLocal } from '@/types'
 import { logDebug } from './log'
+import { ConfirmOptions } from '@solana/web3.js'
 
 const programIds = {
   hausS13jsjafwWwGqZTUQRmWyvyxn9EQpqMwV1PBBmk: 'auctionHouse',
@@ -12,6 +13,9 @@ const programIds = {
 
 export class MplexAmman {
   private readonly _amman: Amman | undefined
+  get ammanEnabled() {
+    return this._amman != null
+  }
 
   private constructor(cluster: ClusterWithLocal) {
     // At this point we require the MPLEX_AMMAN env var to be set, but we could
@@ -36,9 +40,26 @@ export class MplexAmman {
     return this._amman
   }
 
+  tweakConfirmOptions<T extends { confirmOptions?: ConfirmOptions }>(
+    args: T
+  ): T {
+    const skipPreflight = this.ammanEnabled
+    const confirmOptions = { ...args.confirmOptions, skipPreflight }
+    if (this.ammanEnabled) {
+      confirmOptions.commitment = 'singleGossip'
+    }
+    return {
+      ...args,
+      confirmOptions,
+    }
+  }
+
   private static _instance: MplexAmman | undefined
   static init(cluster: ClusterWithLocal) {
     MplexAmman._instance = new MplexAmman(cluster)
+  }
+  static get instance(): MplexAmman | undefined {
+    return MplexAmman._instance
   }
   static get amman(): Amman | undefined {
     return MplexAmman._instance?.amman
@@ -46,3 +67,9 @@ export class MplexAmman {
 }
 
 export const tryAmman = () => MplexAmman.amman
+
+export function tweakConfirmOptions<
+  T extends { confirmOptions?: ConfirmOptions }
+>(args: T): T {
+  return MplexAmman.instance?.tweakConfirmOptions(args) ?? args
+}

@@ -9,6 +9,7 @@ import { BigNumber } from '@metaplex-foundation/js'
 import { checked, mplex } from './flags'
 import { cmdCandyMachineCreate } from '@/commands/candy-machine'
 import { resolveIdentity } from '@/utils/identity'
+import { tweakConfirmOptions } from '@/utils/amman'
 
 const commands = yargs(hideBin(process.argv))
   // -----------------
@@ -134,11 +135,11 @@ async function main() {
           const itemsAvailable = args.items as BigNumber
           const sellerFeeBasisPoints = args.points as number
           const identity = resolveIdentity(keypair)
-          const createArgs: CandyMachineCreateArgs = {
+          const createArgs = tweakConfirmOptions<CandyMachineCreateArgs>({
             itemsAvailable,
             sellerFeeBasisPoints,
-          }
-          logInfo({ ...createArgs, commitment, cluster })
+          })
+          logInfo({ ...createArgs, cluster })
           await cmdCandyMachineCreate(cluster, commitment, identity, createArgs)
           break
         }
