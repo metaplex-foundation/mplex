@@ -1,5 +1,9 @@
 import { Cluster, Commitment } from '@solana/web3.js'
 import { strict as assert } from 'assert'
+import {
+  CreateCandyMachineInput,
+  DefaultCandyGuardSettings,
+} from '@metaplex-foundation/js'
 
 // -----------------
 // Clusters
@@ -43,3 +47,16 @@ export function isCommitment(value: string): value is Commitment {
 export function assertCommitment(value: string): asserts value is Commitment {
   assert(isCommitment(value), `Invalid commitment: ${value}`)
 }
+
+// -----------------
+// Generic Helpers
+// -----------------
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>
+
+// -----------------
+// CandyMachine
+// -----------------
+export type CandyMachineCreateArgs = Optional<
+  CreateCandyMachineInput<DefaultCandyGuardSettings>,
+  'collection'
+>

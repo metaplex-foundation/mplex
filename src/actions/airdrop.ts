@@ -1,5 +1,5 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
-import { tryAmman } from '../utils/amman'
+import { tryAmman } from '@/utils/amman'
 
 export async function airdrop(
   connection: Connection,

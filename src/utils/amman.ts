@@ -1,6 +1,6 @@
 import { Amman } from '@metaplex-foundation/amman-client'
-import { ClusterWithLocal } from '../types'
-import { logDebug } from '../utils/log'
+import { ClusterWithLocal } from '@/types'
+import { logDebug } from './log'
 
 const programIds = {
   hausS13jsjafwWwGqZTUQRmWyvyxn9EQpqMwV1PBBmk: 'auctionHouse',

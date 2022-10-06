@@ -7,10 +7,10 @@ import {
   devClusters,
 } from '../types'
 import { strict as assert } from 'assert'
-import { cmdAirdrop } from './commands/airdrop'
-import { closeConnection } from '../utils/connection'
-import { logError } from '../utils/log'
-import { MplexAmman } from 'src/utils/amman'
+import { cmdAirdrop } from '@/commands/airdrop'
+import { closeConnection } from '@/utils/connection'
+import { logError } from '@/utils/log'
+import { MplexAmman } from '@/utils/amman'
 
 const commands = yargs(hideBin(process.argv))
   // -----------------
