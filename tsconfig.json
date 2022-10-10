@@ -22,7 +22,10 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "lib": ["esnext"]
+    "lib": ["esnext"],
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src", "test"]
 }

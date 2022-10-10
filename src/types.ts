@@ -1,5 +1,10 @@
 import { Cluster, Commitment } from '@solana/web3.js'
 import { strict as assert } from 'assert'
+import {
+  CreateCandyMachineInput,
+  DefaultCandyGuardSettings,
+  Cluster as SdkCluster,
+} from '@metaplex-foundation/js'
 
 // -----------------
 // Clusters
@@ -14,6 +19,13 @@ export const clusters: Readonly<ClusterWithLocal[]> = [
 
 export type DevCluster = 'devnet' | 'local'
 export const devClusters: Readonly<DevCluster[]> = ['devnet', 'local'] as const
+
+export function clusterWithLocalToSdkCluster(
+  cluster: ClusterWithLocal
+): SdkCluster {
+  if (cluster === 'local') return 'localnet'
+  return cluster
+}
 
 export function isDevCluster(value: string): value is DevCluster {
   return devClusters.includes(value as DevCluster)
@@ -43,3 +55,16 @@ export function isCommitment(value: string): value is Commitment {
 export function assertCommitment(value: string): asserts value is Commitment {
   assert(isCommitment(value), `Invalid commitment: ${value}`)
 }
+
+// -----------------
+// Generic Helpers
+// -----------------
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>
+
+// -----------------
+// CandyMachine
+// -----------------
+export type CandyMachineCreateArgs = Optional<
+  CreateCandyMachineInput<DefaultCandyGuardSettings>,
+  'collection'
+>

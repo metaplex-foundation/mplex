@@ -1,9 +1,9 @@
 import { Commitment, Connection } from '@solana/web3.js'
-import { urlFromCluster } from 'src/utils/connection'
-import { logInfo } from '../../utils/log'
-import { airdrop } from '../../actions/airdrop'
-import { DevCluster } from '../../types'
-import { asPublicKey } from '../../utils/pubkey'
+import { urlFromCluster } from '@/utils/connection'
+import { logInfo } from '@/utils'
+import { airdrop } from '@/actions/airdrop'
+import { DevCluster } from '@/types'
+import { asPublicKey } from '@/utils/pubkey'
 
 export async function cmdAirdrop(
   cluster: DevCluster,

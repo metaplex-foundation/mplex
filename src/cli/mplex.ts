@@ -1,23 +1,27 @@
 import yargs from 'yargs/yargs'
 import { hideBin } from 'yargs/helpers'
-import {
-  assertCommitment,
-  assertDevCluster,
-  commitments,
-  devClusters,
-} from '../types'
+import { CandyMachineCreateArgs, devClusters } from '@/types'
 import { strict as assert } from 'assert'
-import { cmdAirdrop } from './commands/airdrop'
-import { closeConnection } from '../utils/connection'
-import { logError } from '../utils/log'
-import { MplexAmman } from 'src/utils/amman'
+import { cmdAirdrop } from '@/commands/airdrop'
+import { closeConnection } from '@/utils/connection'
+import { logError } from '@/utils'
+import { BigNumber } from '@metaplex-foundation/js'
+import { checked, mplex } from './flags'
+import { cmdCandyMachineCreate } from '@/commands/candy-machine'
+import { resolveIdentity } from '@/utils/identity'
+import { tweakConfirmOptions } from '@/utils/amman'
 
 const commands = yargs(hideBin(process.argv))
+  // -----------------
+  // Airdrop
+  // -----------------
   .command(
     'airdrop',
     `Drops the amount of sols to the provided address (only works for ${devClusters} clusters)`,
     (args) => {
-      args
+      mplex(args)
+        .cluster()
+        .commitment()
         .positional('pubkey', {
           describe: 'The pubkey to which we want to drop the SOL.',
           type: 'string',
@@ -28,24 +32,50 @@ const commands = yargs(hideBin(process.argv))
           type: 'string',
           default: 1,
         })
-        .option('cluster', {
-          alias: 'c',
-          describe:
-            'The cluster on which to perform the airdrop. Defaults to MPLEX_CLUSTER or "devnet".',
-          type: 'string',
-          choices: devClusters,
-          default: process.env.MPLEX_CLUSTER ?? 'devnet',
-        })
-        .option('commitment', {
-          alias: 'm',
-          describe: 'The commitment of the transaction',
-          type: 'string',
-          choices: commitments,
-          default: 'singleGossip',
-        })
     }
   )
-  .command('cm', 'Creates and interacts with candy machines', (_args) => {})
+  // -----------------
+  // CM (Candy Machine)
+  // -----------------
+  .command('cm', 'Creates and interacts with candy machines', (args) => {
+    args
+      .command('create', 'Create a new Candy Machine', (args) => {
+        mplex(args).cluster().commitment().keypair().items().points()
+      })
+      .command('update', 'Update an existing Candy Machine', (_args) => {})
+      .command(
+        'insert',
+        'Insert items into an existing Candy Machine',
+        (_args) => {}
+      )
+      .command('delete', 'Delete an existing Candy Machine', (_args) => {})
+      .command('mint', 'Mint from an existing Candy Machine', (_args) => {})
+      .command(
+        'find',
+        'Finds an existing Candy Machine by its addres (includes Candy Guard if any)',
+        (_args) => {}
+      )
+      // -----------------
+      // CM Candy Guards
+      // -----------------
+      .command(
+        'cg',
+        'Creates and interacts with candy machine guards',
+        (args) => {
+          args
+            .command('create', 'Creates a new Candy Guard', (_args) => {})
+            .command('update', 'Updates an existing Candy Guard', (_args) => {})
+            .command('delete', 'Deletes an existing Candy Guard', (_args) => {})
+            .command(
+              'find',
+              'Finds an existing Candy Guard by address or authority',
+              (_args) => {}
+            )
+            .command('wrap', 'Wraps an existing Candy Guard', (_args) => {})
+            .command('unwrap', 'Unwraps an existing Candy Guard', (_args) => {})
+        }
+      )
+  })
 
 async function main() {
   const args = await commands.parse()
@@ -54,16 +84,17 @@ async function main() {
     commands.showHelp()
     return
   }
-  const command = cs[0]
-  switch (command) {
+  const [cmd, sub1, sub2] = cs
+  switch (cmd) {
     // -----------------
     // airdrop
     // -----------------
     case 'airdrop': {
-      const { commitment, cluster } = args
       try {
-        const destination = cs[1]
-        const maybeAmount = cs[2]
+        const { commitment, cluster } = checked(args)
+
+        const destination = sub1
+        const maybeAmount = sub2
         const amount =
           maybeAmount == null
             ? 1
@@ -75,16 +106,6 @@ async function main() {
           typeof destination === 'string',
           'Destination public key string is required'
         )
-        assert(
-          typeof commitment === 'string',
-          'Commitment needs to be a string'
-        )
-        assertCommitment(commitment)
-
-        assert(typeof cluster === 'string', 'Cluster needs to be a string')
-        assertDevCluster(cluster)
-
-        MplexAmman.init(cluster)
 
         const { connection } = await cmdAirdrop(
           cluster,
@@ -99,6 +120,32 @@ async function main() {
         commands.showHelp()
       }
       break
+    }
+    // -----------------
+    // CandyMachine Create
+    // -----------------
+    case 'cm': {
+      switch (sub1) {
+        case 'cg': {
+          logError('CandyGuard not yet handled')
+          break
+        }
+        case 'create': {
+          const { commitment, cluster, keypair } = checked(args)
+          const itemsAvailable = args.items as BigNumber
+          const sellerFeeBasisPoints = args.points as number
+          const identity = resolveIdentity(keypair)
+          const createArgs = tweakConfirmOptions<CandyMachineCreateArgs>({
+            itemsAvailable,
+            sellerFeeBasisPoints,
+          })
+          await cmdCandyMachineCreate(cluster, commitment, identity, createArgs)
+          break
+        }
+        default: {
+          logError('CandyMachine subcommand %s not yet handled', sub1)
+        }
+      }
     }
   }
 }
