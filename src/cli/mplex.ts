@@ -4,7 +4,7 @@ import { CandyMachineCreateArgs, devClusters } from '@/types'
 import { strict as assert } from 'assert'
 import { cmdAirdrop } from '@/commands/airdrop'
 import { closeConnection } from '@/utils/connection'
-import { logError, logInfo } from '@/utils'
+import { logError } from '@/utils'
 import { BigNumber } from '@metaplex-foundation/js'
 import { checked, mplex } from './flags'
 import { cmdCandyMachineCreate } from '@/commands/candy-machine'
@@ -139,7 +139,6 @@ async function main() {
             itemsAvailable,
             sellerFeeBasisPoints,
           })
-          logInfo({ ...createArgs, cluster })
           await cmdCandyMachineCreate(cluster, commitment, identity, createArgs)
           break
         }

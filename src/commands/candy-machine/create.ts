@@ -7,8 +7,9 @@ import {
 } from '@/types'
 import { Metaplex, MetaplexPlugin } from '@metaplex-foundation/js'
 import { candyMachineCreate } from '@/actions/candy-machine'
+import { logInfo } from '@/utils'
 
-export function cmdCandyMachineCreate(
+export async function cmdCandyMachineCreate(
   cluster: DevCluster,
   commitment: Commitment,
   identity: MetaplexPlugin,
@@ -20,5 +21,7 @@ export function cmdCandyMachineCreate(
   const mx = Metaplex.make(connection, {
     cluster: clusterWithLocalToSdkCluster(cluster),
   }).use(identity)
-  return candyMachineCreate(mx, args)
+  const candyMachine = await candyMachineCreate(mx, args)
+  logInfo('Successfully created candy machine at', candyMachine.address)
+  return candyMachine
 }
